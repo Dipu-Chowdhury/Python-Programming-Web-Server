@@ -1,5 +1,5 @@
 from socket import *
-import sys
+import sys  
 
 def webServer(port=13331):
     serverSocket = socket(AF_INET, SOCK_STREAM)
@@ -14,14 +14,21 @@ def webServer(port=13331):
         try:
             message = connectionSocket.recv(1024).decode()
             filename = message.split()[1]
-            f = open(filename[1:], 'r')
-            outputData = f.read()
+            f = open(filename[1:], 'r')  
+            outputData = f.read()  
             f.close()
-            connectionSocket.send(outputData.encode())
+            header = 'HTTP/1.1 200 OK\r\n'
+            header += 'Content-Type: text/html; charset=UTF-8\r\n'
+            header += 'Connection: close\r\n\r\n'  
+            connectionSocket.send(header.encode() + outputData.encode())
+            connectionSocket.close()
+
         except IOError:
-            errorMessage = 'File not found'
-            connectionSocket.send(errorMessage.encode())
-        finally:
+            header = 'HTTP/1.1 404 Not Found\r\n'
+            header += 'Content-Type: text/html; charset=UTF-8\r\n'
+            header += 'Connection: close\r\n\r\n'
+            errorMessage = '<html><body><h1>404 Not Found</h1></body></html>'
+            connectionSocket.send(header.encode() + errorMessage.encode())
             connectionSocket.close()
 
 if __name__ == "__main__":
